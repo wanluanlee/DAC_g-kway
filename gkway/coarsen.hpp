@@ -56,7 +56,7 @@ namespace gk { // begin of namespace gk ========================================
     //loop through neighbor list to find the heaviest edge neighbor
     unsigned heaviest_edge_wgt = 0;
     unsigned heaviest_degree = 0;
-    unsigned neighbor_with_heaviest_edge = 0;
+    unsigned neighbor_with_heaviest_edge = (gid + 1);
     unsigned edge_wgt, current_neighbor, neighbor_degree;
     for(int i = neighbor_start; i < neighbor_end; i++) {
       edge_wgt = d_adjwgt[i];
