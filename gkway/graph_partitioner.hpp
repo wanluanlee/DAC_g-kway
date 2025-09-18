@@ -201,7 +201,7 @@ void uncoarsening(std::vector<unsigned>& coarsen_num_vertices_vec, std::vector<u
    gk::calculate_cutsize <<< num_block, THREAD_PER_BLOCK, 0, stream1 >>> (d_partition, d_adjncy, d_adjwgt, d_adjp, d_cutsize, num_finer_vertex);
    check_cuda(cudaMemcpy(&h_cutsize, d_cutsize, sizeof(unsigned), cudaMemcpyDeviceToHost));
 
-   std::cout << "***** h_cutsize " << h_cutsize << '\n';
+   //std::cout << "***** h_cutsize " << h_cutsize << '\n';
 
   check_cuda(cudaFree(d_mv_buffer));
   check_cuda(cudaFree(d_tmp_partition));
@@ -219,10 +219,10 @@ void uncoarsening(std::vector<unsigned>& coarsen_num_vertices_vec, std::vector<u
   cudaFree(d_pos);
 }
 
-void graph_partitioner(const std::string& graph_file, const int NUM_PARTITIONS) {
+void graph_partitioner(const std::string& GRAPH_FILE, const std::string& OUT_FILE, const int NUM_PARTITIONS) {
   
   //call graph parser
-  gk::Graph graph_parser(graph_file);
+  gk::Graph graph_parser(GRAPH_FILE);
   const unsigned MAX_NUM_VERTICES = graph_parser.get_num_vertex();
   const unsigned MAX_NUM_EDGES = graph_parser.get_num_edge();
   const unsigned TOTAL_VWGT = graph_parser.get_total_vertex_weight();
@@ -344,14 +344,13 @@ void graph_partitioner(const std::string& graph_file, const int NUM_PARTITIONS) 
 
   //check_cuda(cudaMemsetAsync(d_cutsize, 0, sizeof(int), stream1));
   //gk::calculate_cutsize <<< num_block, THREAD_PER_BLOCK, 0, stream1 >>> (d_partition, d_adjncy, d_adjwgt, d_adjp, d_cutsize, finer_num_vertices);
-  //check_cuda(cudaMemcpyAsync(&h_cutsize, d_cutsize, sizeof(int), cudaMemcpyDeviceToHost, stream1));
-  //cudaStreamSynchronize(stream1);
+  unsigned h_cutsize;
+  check_cuda(cudaMemcpy(&h_cutsize, d_cutsize, sizeof(int), cudaMemcpyDeviceToHost));
 
-  //std::cout << "***** h_cutsize " << h_cutsize << '\n';
-  //std::vector<int> vertex_partition(MAX_NUM_VERTICES, 0);
-  //check_cuda(cudaMemcpyAsync(vertex_partition.data(), d_partition, sizeof(int) * MAX_NUM_VERTICES, cudaMemcpyDeviceToHost, stream1));
-  //cudaStreamSynchronize(stream1);
-  //graph_parser.dump_result(vertex_partition, OUT_FILE);
+  std::cout << "***** h_cutsize " << h_cutsize << '\n';
+  std::vector<int> vertex_partition(MAX_NUM_VERTICES, 0);
+  check_cuda(cudaMemcpy(vertex_partition.data(), d_partition, sizeof(int) * MAX_NUM_VERTICES, cudaMemcpyDeviceToHost));
+  graph_parser.dump_result(vertex_partition, OUT_FILE);
 
   cudaFree(d_partition);
   cudaFree(d_partition_wgt);
